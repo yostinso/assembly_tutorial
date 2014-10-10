@@ -46,6 +46,48 @@ var default_cpu = {
 var default_memory = [];
 
 var interpreter = function(cpu, memory) {
+  var arg_map = {
+    NOOP: '',
+    RSET: 'RN',
+    RCPY: 'RR',
+    RADD: 'RR',
+    MSET: 'MR',
+    MGET: 'MR',
+    JILT: 'RNP'
+  };
+  _.each(arg_map, function(val, idx, list) {
+    list[idx] = val.split('');
+  });
+  function args_to_values(op, args) {
+    var map = arg_map[op];
+    return _.map(args, function(arg, i) {
+      switch (map[i]) {
+        case 'R':
+          return REGISTER_TO_NUM[arg];
+          break;
+        case 'M':
+        case 'P':
+        case 'N':
+        default:
+          return arg;
+      }
+    });
+  }
+  function values_to_args(op, args) {
+    var map = arg_map[op];
+    return _.map(args, function(arg, i) {
+      switch (map[i]) {
+        case 'R':
+          return NUM_TO_REGISTER[arg];
+          break;
+        case 'M':
+        case 'P':
+        case 'N':
+        default:
+          return arg;
+      }
+    });
+  }
   var instructions = {
     NOOP: function() {},
     RSET: function(register, value) {
@@ -71,11 +113,17 @@ var interpreter = function(cpu, memory) {
     }
   }
 
+
   function log_error(msg) {
     alert(msg);
   }
 
+  var last_instruction = [];
   return {
+    last_instruction: function() {
+      var friendly_args = values_to_args(last_instruction[0], _.rest(last_instruction));
+      return last_instruction[0] + " " + friendly_args.join(", ");
+    },
     execute: function() {
       var instruction = memory[cpu.IP++];
       if (_.isUndefined(instruction)) {
@@ -93,6 +141,7 @@ var interpreter = function(cpu, memory) {
       for (var i = 0; i < numargs; i++) {
         args.push(memory[cpu.IP++]);
       }
+      last_instruction = [ op ].concat(args);
 
       if (_.find(args, _.isUndefined)) {
         log_error("Bad number of arguments to " + op + ". Expected " + method.length + ", got " + args.length);
@@ -108,11 +157,12 @@ var interpreter = function(cpu, memory) {
 function clear_cpu_log() {
   $('.cpu TBODY TR:not(.template)').remove();
 }
-function log_cpu(cpu) {
+function log_cpu(cpu, instruction) {
   var tmpl = $('.cpu TR.template').clone().removeClass('template');
   _.each(_.keys(cpu), function (key) {
     tmpl.find("." + key).text(cpu[key]);
   });
+  tmpl.find('.OP').text(instruction);
   $('.cpu tbody').append(tmpl);
 }
 
@@ -176,7 +226,7 @@ function run_program() {
   var MAX_TICKS = 10000;
   var ticks_run = 0;
   while (i.execute() && ticks_run <= MAX_TICKS) {
-    log_cpu(cpu);
+    log_cpu(cpu, i.last_instruction());
     dump_memory(memory);
     ticks_run++;
   }
