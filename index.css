@@ -1,0 +1,84 @@
+BODY {
+  padding-bottom: 10em;
+}
+
+TABLE.cpu, TABLE.heap {
+  border-collapse: collapse;
+  font: 12pt monospace;
+}
+TABLE.cpu TH, TABLE.heap TH {
+  border: thin solid black;
+  padding: 3px;
+  min-width: 2em;
+}
+TABLE.cpu TH:empty, TABLE.heap TH:empty {
+  border: none;
+}
+TABLE.cpu TR:last-child TD {
+  background-color: #CCFFCC;
+}
+TABLE.cpu TD, TABLE.heap TD {
+  border: thin solid black;
+}
+TABLE.heap TBODY TD:first-child {
+  text-align: right;
+}
+
+TABLE TR.template {
+  display: none;
+}
+
+DT {
+  font-family: monospace;
+  font-weight: bold;
+}
+
+#program {
+  font-weight: bold;
+  font-size: 18pt;
+  font-family: Monaco, Consolas, "Lucida Console", monospace;
+}
+
+#program DIV.line_numbers {
+  float: left;
+  margin-right: 0.3em;
+  margin-top: 2px;
+  text-align: right;
+  width: 2.5em;
+}
+
+#program TEXTAREA {
+  display: inline-block;
+  float: left;
+  width: 15em;
+  height: 10em;
+  font-weight: bold;
+  font-size: 18pt;
+  font-family: Monaco, Consolas, "Lucida Console", monospace;
+}
+
+#program .footer {
+  position: relative;
+  left: 2.5em;
+  width: 15em;
+  margin-left: 7px;
+  display: block;
+  clear: left;
+}
+
+INPUT {
+  font-weight: bold;
+  font-size: 12pt;
+  border: 2px solid #CCCCCC;
+  height: 2em;
+}
+
+#program INPUT[type=submit] {
+  color: #007700;
+}
+#program INPUT[type=reset] {
+  color: black;
+}
+#run_button {
+  color: red;
+}
