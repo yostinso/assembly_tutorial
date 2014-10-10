@@ -25,10 +25,14 @@ function init() {
 
 function render_line_numbers() {
   var offset = parseInt($('#program .load_at').val()) || 0;
-  var num_lines = Math.max(($('#program textarea').val() + "...").split(/\n/).length, 1);
+  var lines = $('#program textarea').val().split(/\n/);
+  var num_lines = lines.length;
   var str = "";
+  var mem_pos = 0;
   for (var i = 0; i < num_lines; i++) {
-    str += i+offset + "<br/>";
+    str += (mem_pos + offset) + "<br/>";
+    var parts = lines[i].split(/,? /);
+    mem_pos += parts.length;
   }
   $('#program .line_numbers').html(str);
 }
@@ -180,8 +184,10 @@ function run_program() {
 
 $(document).on('ready', function() {
   init();
-  $('#program textarea').on('change keyup', function(evt) {
-    if (evt.type == "change" || evt.which == 13 || evt.which == 8) { render_line_numbers(evt); }
+  $('#program textarea').on('change keyup click', function(evt) {
+    if (evt.type == "change" || evt.type == "click" || evt.which == 13 || evt.which == 8 || evt.which == 46) {
+      render_line_numbers(evt);
+    }
   }).trigger('change');
   $('#program .load_at').on('change keyup', render_line_numbers);
   $('#program textarea').on('keypress', function(evt) {
