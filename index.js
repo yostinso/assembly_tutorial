@@ -44,50 +44,50 @@ var default_cpu = {
   R3: 0
 };
 var default_memory = [];
+var arg_map = {
+  NOOP: '',
+  RSET: 'RN',
+  RCPY: 'RR',
+  RADD: 'RR',
+  MSET: 'MR',
+  MGET: 'MR',
+  JILT: 'RNP'
+};
+_.each(arg_map, function(val, idx, list) {
+  list[idx] = val.split('');
+});
+function args_to_values(op, args) {
+  var map = arg_map[op];
+  return _.map(args, function(arg, i) {
+    switch (map[i]) {
+      case 'R':
+        return REGISTER_TO_NUM[arg];
+        break;
+      case 'M':
+      case 'P':
+      case 'N':
+      default:
+        return arg;
+    }
+  });
+}
+function values_to_args(op, args) {
+  var map = arg_map[op];
+  return _.map(args, function(arg, i) {
+    switch (map[i]) {
+      case 'R':
+        return NUM_TO_REGISTER[arg];
+        break;
+      case 'M':
+      case 'P':
+      case 'N':
+      default:
+        return arg;
+    }
+  });
+}
 
 var interpreter = function(cpu, memory) {
-  var arg_map = {
-    NOOP: '',
-    RSET: 'RN',
-    RCPY: 'RR',
-    RADD: 'RR',
-    MSET: 'MR',
-    MGET: 'MR',
-    JILT: 'RNP'
-  };
-  _.each(arg_map, function(val, idx, list) {
-    list[idx] = val.split('');
-  });
-  function args_to_values(op, args) {
-    var map = arg_map[op];
-    return _.map(args, function(arg, i) {
-      switch (map[i]) {
-        case 'R':
-          return REGISTER_TO_NUM[arg];
-          break;
-        case 'M':
-        case 'P':
-        case 'N':
-        default:
-          return arg;
-      }
-    });
-  }
-  function values_to_args(op, args) {
-    var map = arg_map[op];
-    return _.map(args, function(arg, i) {
-      switch (map[i]) {
-        case 'R':
-          return NUM_TO_REGISTER[arg];
-          break;
-        case 'M':
-        case 'P':
-        case 'N':
-        default:
-          return arg;
-      }
-    });
-  }
   var instructions = {
     NOOP: function() {},
     RSET: function(register, value) {
@@ -112,7 +112,6 @@ var interpreter = function(cpu, memory) {
       }
     }
   }
-
 
   function log_error(msg) {
     alert(msg);
@@ -162,7 +161,12 @@ function log_cpu(cpu, instruction) {
   _.each(_.keys(cpu), function (key) {
     tmpl.find("." + key).text(cpu[key]);
   });
-  tmpl.find('.OP').text(instruction);
+  if (_.isEmpty(instruction)) {
+    tmpl.find('.OP').text('NO DATA');
+    tmpl.addClass('ended');
+  } else {
+    tmpl.find('.OP').text(instruction);
+  }
   $('.cpu tbody').append(tmpl);
 }
 
@@ -220,15 +224,25 @@ function load_program() {
   dump_memory(memory);
 }
 
-function run_program() {
-  load_program(); // TODO: rm
-  var i = interpreter(cpu, memory);
+function run_program(steps) {
+  if (_.isEqual(memory, default_memory)) {
+    load_program();
+  }
+
   var MAX_TICKS = 10000;
-  var ticks_run = 0;
-  while (i.execute() && ticks_run <= MAX_TICKS) {
+  var steps_run = 0;
+
+  steps = steps || MAX_TICKS;
+
+  var i = interpreter(cpu, memory);
+  var running = true;
+  while (steps_run < steps && (running = i.execute())) {
     log_cpu(cpu, i.last_instruction());
     dump_memory(memory);
-    ticks_run++;
+    steps_run++;
+  }
+  if (!running) {
+    log_cpu(cpu, []);
   }
 }
 
@@ -244,5 +258,6 @@ $(document).on('ready', function() {
     if (evt.which == 13 && (evt.metaKey || evt.ctrlKey)) { load_program(); }
   }).trigger('change');
   $('#program input[type=submit]').on('click', function() { load_program(); return false; });
-  $('#run_button').on('click', run_program);
+  $('#run_button').on('click', function() { run_program(); });
+  $('#step_button').on('click', function() { run_program(1); });
 });

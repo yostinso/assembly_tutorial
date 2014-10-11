@@ -17,6 +17,10 @@ TABLE.cpu TH:empty, TABLE.heap TH:empty {
 TABLE.cpu TR:last-child TD {
   background-color: #CCFFCC;
 }
+TABLE.cpu TR.ended:last-child TD {
+  background-color: #FF3333;
+}
+
 TABLE.cpu TD, TABLE.heap TD {
   border: thin solid black;
 }
