@@ -174,7 +174,7 @@ function dump_memory(memory) {
   $('.heap TBODY TR:not(.template)').remove();
   var tmpl = $('.heap TR.template');
   var body = $('.heap TBODY');
-  _.each(_.keys(memory), function(idx) {
+  _.each(_.keys(memory).sort(), function(idx) {
     idx = parseInt(idx);
     var row = tmpl.clone().removeClass('template');
     row.find('.pos').html(idx);
